@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SQL Weekend — A Two-Day Intensive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js"></script>
+<style>
+  :root{
+    --paper:#f5f2ec;
+    --ink:#111111;
+    --ink-soft:#3a3a3a;
+    --ink-dim:#6b6b6b;
+    --rule:#2a2a2a;
+    --line:#d9d3c7;
+    --accent:#c8411e;
+    --accent-soft:#e8d7cc;
+    --good:#1e6b3a;
+    --good-soft:#d4e4d7;
+    --bad:#a01818;
+    --code-bg:#1a1a1a;
+    --code-fg:#f5f2ec;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--paper);color:var(--ink);font-family:'Inter',sans-serif;font-size:15px;line-height:1.6}
+  body{min-height:100vh}
+  ::selection{background:var(--ink);color:var(--paper)}
+
+  /* Masthead */
+  .masthead{
+    border-bottom:2px solid var(--ink);
+    padding:28px 40px 20px;
+    display:flex;justify-content:space-between;align-items:flex-end;gap:40px;
+  }
+  .masthead-left .kicker{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;letter-spacing:0.18em;text-transform:uppercase;
+    color:var(--ink-dim);margin-bottom:6px;
+  }
+  .masthead-title{
+    font-family:'Fraunces',serif;
+    font-weight:900;font-size:56px;line-height:0.95;letter-spacing:-0.02em;
+    font-variation-settings:"opsz" 144;
+  }
+  .masthead-title em{font-style:italic;font-weight:400;color:var(--accent)}
+  .masthead-right{text-align:right;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-dim)}
+  .masthead-right .issue{font-size:14px;color:var(--ink);margin-bottom:4px}
+  .progress-bar{
+    margin-top:8px;width:220px;height:2px;background:var(--line);
+    position:relative;overflow:hidden;
+  }
+  .progress-bar-fill{position:absolute;top:0;left:0;height:100%;background:var(--ink);transition:width 0.4s ease}
+
+  /* Layout */
+  .page{display:grid;grid-template-columns:280px 1fr;min-height:calc(100vh - 110px)}
+  .sidebar{
+    border-right:1px solid var(--line);
+    padding:32px 24px;
+    position:sticky;top:0;align-self:start;
+    max-height:100vh;overflow-y:auto;
+  }
+  .sidebar-heading{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--ink-dim);
+    margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--line);
+  }
+  .day-label{
+    font-family:'Fraunces',serif;font-style:italic;font-weight:500;
+    font-size:18px;margin:18px 0 10px;color:var(--ink);
+  }
+  .day-label:first-of-type{margin-top:0}
+  .lesson-item{
+    display:flex;align-items:baseline;gap:10px;padding:8px 10px;cursor:pointer;
+    border-radius:2px;transition:background 0.15s;margin:2px -10px;
+    position:relative;
+  }
+  .lesson-item:hover{background:rgba(0,0,0,0.04)}
+  .lesson-item.active{background:var(--ink);color:var(--paper)}
+  .lesson-item.active .lesson-num{color:var(--paper)}
+  .lesson-num{
+    font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-dim);
+    min-width:24px;letter-spacing:0.05em;
+  }
+  .lesson-title{font-size:13px;line-height:1.3;flex:1}
+  .lesson-check{
+    position:absolute;right:8px;top:50%;transform:translateY(-50%);
+    font-size:11px;color:var(--good);font-weight:700;
+  }
+  .lesson-item.active .lesson-check{color:var(--paper)}
+
+  /* Main */
+  .main{padding:48px 60px;max-width:900px}
+  .article-header{margin-bottom:32px;padding-bottom:24px;border-bottom:1px solid var(--line)}
+  .article-kicker{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);
+    margin-bottom:12px;
+  }
+  h1.article-title{
+    font-family:'Fraunces',serif;font-weight:700;font-size:42px;line-height:1.05;
+    letter-spacing:-0.015em;margin-bottom:12px;font-variation-settings:"opsz" 144;
+  }
+  .article-dek{
+    font-family:'Fraunces',serif;font-style:italic;font-weight:400;
+    font-size:19px;line-height:1.45;color:var(--ink-soft);max-width:640px;
+  }
+  .article-meta{
+    margin-top:16px;display:flex;gap:20px;
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.1em;
+    text-transform:uppercase;color:var(--ink-dim);
+  }
+
+  .section{margin:32px 0}
+  .section h2{
+    font-family:'Fraunces',serif;font-weight:600;font-size:24px;
+    margin-bottom:12px;letter-spacing:-0.01em;
+  }
+  .section h3{
+    font-family:'Inter',sans-serif;font-weight:600;font-size:15px;
+    text-transform:uppercase;letter-spacing:0.1em;margin:20px 0 10px;color:var(--ink-soft);
+  }
+  .section p{margin-bottom:14px;font-size:15.5px;line-height:1.65}
+  .section p.lead{font-size:17px;line-height:1.6;font-family:'Fraunces',serif;font-weight:400}
+  .section ul,.section ol{margin:10px 0 16px 20px}
+  .section li{margin-bottom:6px;font-size:15px}
+  .section strong{font-weight:600}
+  .section em{font-style:italic}
+  .section code{
+    font-family:'JetBrains Mono',monospace;font-size:13px;
+    background:rgba(0,0,0,0.06);padding:2px 6px;border-radius:2px;
+  }
+
+  /* Pull quote / callout */
+  .callout{
+    border-left:3px solid var(--accent);
+    padding:14px 18px;margin:20px 0;
+    background:var(--accent-soft);
+    font-family:'Fraunces',serif;font-size:15.5px;line-height:1.5;
+  }
+  .callout-label{
+    display:block;font-family:'JetBrains Mono',monospace;font-size:10px;
+    letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);
+    margin-bottom:6px;font-weight:700;
+  }
+
+  /* Code blocks */
+  .code-example{
+    background:var(--code-bg);color:var(--code-fg);
+    font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.6;
+    padding:18px 22px;border-radius:3px;margin:14px 0;
+    overflow-x:auto;white-space:pre;
+    position:relative;
+  }
+  .code-example::before{
+    content:"SQL";
+    position:absolute;top:10px;right:14px;
+    font-size:9px;letter-spacing:0.2em;color:#666;
+  }
+
+  /* Query editor */
+  .editor-block{
+    margin:24px 0;border:1px solid var(--ink);border-radius:3px;overflow:hidden;
+    background:#fff;
+  }
+  .editor-header{
+    background:var(--ink);color:var(--paper);
+    padding:8px 14px;display:flex;justify-content:space-between;align-items:center;
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.1em;
+  }
+  .editor-header-label{text-transform:uppercase}
+  .editor-textarea{
+    width:100%;min-height:120px;border:none;outline:none;
+    font-family:'JetBrains Mono',monospace;font-size:13.5px;line-height:1.6;
+    padding:16px 18px;background:#fff;color:var(--ink);resize:vertical;
+    tab-size:2;
+  }
+  .editor-actions{
+    display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--line);
+    background:#fafafa;
+  }
+  button{
+    font-family:'Inter',sans-serif;font-size:12px;font-weight:500;
+    padding:7px 14px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);
+    cursor:pointer;border-radius:2px;letter-spacing:0.02em;
+    transition:all 0.15s;
+  }
+  button:hover{background:var(--accent);border-color:var(--accent)}
+  button.secondary{background:transparent;color:var(--ink)}
+  button.secondary:hover{background:var(--ink);color:var(--paper)}
+  button.ghost{background:transparent;color:var(--ink-dim);border:1px solid var(--line)}
+  button.ghost:hover{border-color:var(--ink);color:var(--ink)}
+  button:disabled{opacity:0.5;cursor:not-allowed}
+
+  .results{padding:14px 18px;border-top:1px solid var(--line);background:#fafaf7;max-height:320px;overflow:auto}
+  .results-meta{
+    font-family:'JetBrains Mono',monospace;font-size:10px;
+    letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-dim);
+    margin-bottom:8px;
+  }
+  .results-error{color:var(--bad);font-family:'JetBrains Mono',monospace;font-size:12px;white-space:pre-wrap}
+  .results-table{width:100%;border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:12px}
+  .results-table th{
+    text-align:left;padding:6px 10px;background:var(--ink);color:var(--paper);
+    font-weight:500;letter-spacing:0.05em;font-size:11px;
+  }
+  .results-table td{padding:5px 10px;border-bottom:1px solid var(--line)}
+  .results-table tr:hover td{background:rgba(0,0,0,0.03)}
+
+  /* Exercise */
+  .exercise{
+    border:1px dashed var(--ink);padding:20px 24px;margin:24px 0;
+    background:rgba(200,65,30,0.03);
+  }
+  .exercise-label{
+    font-family:'JetBrains Mono',monospace;font-size:10px;
+    letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);font-weight:700;
+    margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;
+  }
+  .exercise-prompt{
+    font-family:'Fraunces',serif;font-size:17px;line-height:1.5;margin-bottom:12px;
+  }
+  .solution{
+    margin-top:14px;padding-top:14px;border-top:1px dotted var(--line);
+    display:none;
+  }
+  .solution.open{display:block}
+  .solution-label{
+    font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.2em;
+    text-transform:uppercase;color:var(--ink-dim);margin-bottom:6px;
+  }
+
+  /* Schema panel */
+  .schema-toggle{
+    position:fixed;bottom:20px;right:20px;z-index:10;
+    background:var(--ink);color:var(--paper);
+    padding:10px 16px;font-family:'JetBrains Mono',monospace;font-size:11px;
+    letter-spacing:0.1em;border-radius:20px;cursor:pointer;
+    border:none;box-shadow:0 4px 20px rgba(0,0,0,0.15);
+    text-transform:uppercase;
+  }
+  .schema-panel{
+    position:fixed;bottom:0;right:0;width:420px;max-height:70vh;
+    background:#fff;border-left:1px solid var(--ink);border-top:1px solid var(--ink);
+    padding:20px 24px;overflow-y:auto;z-index:9;
+    transform:translateY(100%);transition:transform 0.3s cubic-bezier(.7,.2,.3,1);
+    box-shadow:-4px -4px 20px rgba(0,0,0,0.08);
+  }
+  .schema-panel.open{transform:translateY(0)}
+  .schema-panel h3{font-family:'Fraunces',serif;font-size:20px;margin-bottom:14px}
+  .schema-table{margin-bottom:18px}
+  .schema-table-name{
+    font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;
+    color:var(--accent);margin-bottom:4px;
+  }
+  .schema-cols{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--ink-soft);line-height:1.6;padding-left:12px}
+  .schema-cols span{color:var(--ink-dim)}
+
+  /* Nav */
+  .lesson-nav{
+    display:flex;justify-content:space-between;gap:20px;
+    margin:48px 0 20px;padding-top:24px;border-top:1px solid var(--line);
+  }
+  .nav-btn{
+    display:flex;flex-direction:column;gap:2px;padding:14px 18px;
+    border:1px solid var(--line);cursor:pointer;text-decoration:none;color:var(--ink);
+    background:#fff;min-width:180px;transition:all 0.15s;
+    font-family:'Inter',sans-serif;border-radius:2px;
+  }
+  .nav-btn:hover{border-color:var(--ink);background:var(--ink);color:var(--paper)}
+  .nav-btn:hover .nav-label{color:var(--paper)}
+  .nav-btn.next{text-align:right;margin-left:auto}
+  .nav-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--ink-dim)}
+  .nav-title{font-family:'Fraunces',serif;font-size:15px;font-weight:500}
+
+  /* Loading state */
+  .loading{
+    position:fixed;inset:0;background:var(--paper);
+    display:flex;align-items:center;justify-content:center;z-index:100;
+    font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.15em;
+    text-transform:uppercase;color:var(--ink-dim);
+  }
+  .loading.hide{display:none}
+
+  /* Schedule */
+  .schedule{margin:24px 0}
+  .schedule-day{
+    border:1px solid var(--line);margin-bottom:12px;padding:16px 20px;
+    background:#fff;
+  }
+  .schedule-day-title{
+    font-family:'Fraunces',serif;font-weight:600;font-size:18px;
+    margin-bottom:4px;
+  }
+  .schedule-day-meta{
+    font-family:'JetBrains Mono',monospace;font-size:11px;
+    color:var(--ink-dim);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;
+  }
+  .schedule-items{display:flex;flex-wrap:wrap;gap:8px}
+  .schedule-chip{
+    font-family:'JetBrains Mono',monospace;font-size:11px;
+    padding:4px 9px;background:var(--paper);border:1px solid var(--line);border-radius:2px;
+  }
+
+  @media(max-width:860px){
+    .page{grid-template-columns:1fr}
+    .sidebar{position:static;max-height:none;border-right:none;border-bottom:1px solid var(--line)}
+    .main{padding:32px 24px}
+    .masthead{flex-direction:column;align-items:flex-start;gap:16px;padding:20px 24px}
+    .masthead-title{font-size:38px}
+    h1.article-title{font-size:30px}
+    .schema-panel{width:100%}
+  }
+</style>
+</head>
+<body>
+
+<div class="loading" id="loading">
+  <div>Loading database engine…</div>
+</div>
+
+<header class="masthead">
+  <div class="masthead-left">
+    <div class="kicker">A Two-Day Intensive · Established 2026</div>
+    <h1 class="masthead-title">SQL <em>Weekend</em></h1>
+  </div>
+  <div class="masthead-right">
+    <div class="issue">Vol. 1 — Reawakening</div>
+    <div id="progress-label">Progress 0 / 10</div>
+    <div class="progress-bar"><div class="progress-bar-fill" id="progress-fill"></div></div>
+  </div>
+</header>
+
+<div class="page">
+  <aside class="sidebar">
+    <div class="sidebar-heading">Curriculum</div>
+    <div class="day-label">Saturday — Foundations</div>
+    <div id="saturday-lessons"></div>
+    <div class="day-label">Sunday — Advanced</div>
+    <div id="sunday-lessons"></div>
+    <div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--line)">
+      <button class="ghost" style="width:100%" onclick="resetProgress()">Reset Progress</button>
+    </div>
+  </aside>
+
+  <main class="main" id="main-content"></main>
+</div>
+
+<button class="schema-toggle" onclick="document.getElementById('schema-panel').classList.toggle('open')">
+  Schema ↗
+</button>
+
+<div class="schema-panel" id="schema-panel">
+  <h3>The Database</h3>
+  <p style="font-family:'Fraunces',serif;font-style:italic;color:var(--ink-soft);margin-bottom:18px;font-size:14px">A small online retailer. Five tables. Plenty to query.</p>
+  <div id="schema-content"></div>
+</div>
+
+<script>
+// ============================================================
+// CURRICULUM
+// ============================================================
+const lessons = [
+  // SATURDAY
+  { day:'sat', num:'01', title:'Reading the Table',
+    kicker:'Module 1 · The SELECT Statement',
+    heading:'Reading the Table',
+    dek:'Every SQL journey starts with one verb: SELECT. It tells the database which columns you want to see, and from which table. The grammar is almost boring — which is precisely the point.',
+    content:`
+      <div class="section">
+        <p class="lead">SQL is a language for asking questions about data. You describe <em>what</em> you want; the database figures out <em>how</em> to get it. That's the whole trick.</p>
+        <p>The most basic question you can ask is: <strong>show me some rows from a table</strong>. That's the SELECT statement.</p>
+        <h3>Anatomy of a SELECT</h3>
+        <div class="code-example">SELECT column_1, column_2
+FROM table_name;</div>
+        <p>Two keywords: <code>SELECT</code> (which columns) and <code>FROM</code> (which table). The semicolon at the end is optional in most editors, but it's a good habit.</p>
+        <p>If you want every column, use the wildcard:</p>
+        <div class="code-example">SELECT * FROM customers;</div>
+        <p>But — and this is a small discipline worth starting right now — <em>don't default to</em> <code>SELECT *</code> in real work. Name your columns. Future-you will thank you.</p>
+        <h3>DISTINCT and LIMIT</h3>
+        <p>Two modifiers you'll use constantly:</p>
+        <ul>
+          <li><code>DISTINCT</code> — return only unique values</li>
+          <li><code>LIMIT n</code> — cap the result set at <em>n</em> rows, useful for peeking</li>
+        </ul>
+        <div class="code-example">SELECT DISTINCT country FROM customers;
+SELECT * FROM products LIMIT 5;</div>
+      </div>
+
+      <div class="callout">
+        <span class="callout-label">On Style</span>
+        SQL keywords are conventionally written in UPPERCASE. The database doesn't care — <code>select</code> works fine — but uppercase keywords make queries legible at a glance. Pick a style and stick with it.
+      </div>
+
+      <div class="section">
+        <h3>Try It</h3>
+        <p>Run the query below. Then modify it. The database is live — break things freely.</p>
+      </div>
+    `,
+    starter:`-- Show the first 5 products
+SELECT name, category, price
+FROM products
+LIMIT 5;`,
+    exercises:[
+      { prompt:'Return the first 10 customers — just their names and the country they live in.',
+        solution:`SELECT name, country FROM customers LIMIT 10;` },
+      { prompt:'List every distinct country represented in the customers table. Alphabetical order would be a nice touch (hint: ORDER BY works even before you "learn" it).',
+        solution:`SELECT DISTINCT country FROM customers ORDER BY country;` },
+    ]
+  },
+
+  { day:'sat', num:'02', title:'Filtering with WHERE',
+    kicker:'Module 2 · The WHERE Clause',
+    heading:'Filtering with WHERE',
+    dek:'Most of the time, you don\'t want every row — you want the rows that match some condition. That\'s what WHERE is for, and it\'s where queries start to feel powerful.',
+    content:`
+      <div class="section">
+        <p class="lead">The WHERE clause is a filter. Every row gets checked against a condition; only the rows where the condition is true come back.</p>
+        <div class="code-example">SELECT name, price
+FROM products
+WHERE price > 100;</div>
+        <h3>Comparison operators</h3>
+        <p>The usual suspects, with one quirk:</p>
+        <ul>
+          <li><code>=</code> equals (note: single <code>=</code>, not <code>==</code>)</li>
+          <li><code>&lt;&gt;</code> or <code>!=</code> not equal</li>
+          <li><code>&lt;</code> <code>&gt;</code> <code>&lt;=</code> <code>&gt;=</code> the math kind</li>
+        </ul>
+        <h3>Combining conditions</h3>
+        <p>Stack conditions with <code>AND</code>, <code>OR</code>, and <code>NOT</code>. Use parentheses to make precedence explicit — it's free, and it prevents bugs.</p>
+        <div class="code-example">SELECT name, price, category
+FROM products
+WHERE category = 'Electronics'
+  AND price &lt; 500;</div>
+        <h3>The handy shortcuts</h3>
+        <ul>
+          <li><code>IN (...)</code> — matches any value in a list</li>
+          <li><code>BETWEEN a AND b</code> — inclusive range</li>
+          <li><code>LIKE</code> — pattern match; <code>%</code> is "any characters", <code>_</code> is "one character"</li>
+          <li><code>IS NULL</code> / <code>IS NOT NULL</code> — because NULL is not a value and won't match <code>= NULL</code></li>
+        </ul>
+        <div class="code-example">SELECT * FROM customers WHERE country IN ('USA', 'Canada', 'Mexico');
+SELECT * FROM products WHERE price BETWEEN 50 AND 200;
+SELECT * FROM customers WHERE email LIKE '%@gmail.com';</div>
+      </div>
+
+      <div class="callout">
+        <span class="callout-label">NULL is Weird</span>
+        NULL means "unknown," not "empty." Any comparison with NULL — <code>= NULL</code>, <code>&lt;&gt; NULL</code>, <code>NULL = NULL</code> — returns NULL, not true. Use <code>IS NULL</code> and <code>IS NOT NULL</code>. Every SQL bug of your career will eventually trace back to this.
+      </div>
+    `,
+    starter:`-- All orders over $500 from customers in the USA
+-- (once you add the join later, this gets more interesting)
+SELECT *
+FROM orders
+WHERE total > 500
+  AND status = 'shipped';`,
+    exercises:[
+      { prompt:'Find all products in the "Books" category that cost less than $30.',
+        solution:`SELECT name, price FROM products
+WHERE category = 'Books' AND price < 30;` },
+      { prompt:'Find customers whose name starts with "S" (case-sensitive in SQLite by default).',
+        solution:`SELECT name, email FROM customers
+WHERE name LIKE 'S%';` },
+      { prompt:'Find all orders with a status of either "pending" or "cancelled" with a total above $200.',
+        solution:`SELECT * FROM orders
+WHERE status IN ('pending', 'cancelled')
+  AND total > 200;` },
+    ]
+  },
+
+  { day:'sat', num:'03', title:'Sorting and Limiting',
+    kicker:'Module 3 · ORDER BY and LIMIT',
+    heading:'Sorting and Limiting',
+    dek:'Databases make no promise about row order unless you ask. ORDER BY is how you ask. LIMIT is how you tell it to stop.',
+    content:`
+      <div class="section">
+        <p class="lead">By default, a SELECT returns rows in whatever order the database finds convenient. That's not random, but it's not reliable either. If you want a specific order, say so.</p>
+        <div class="code-example">SELECT name, price
+FROM products
+ORDER BY price DESC;</div>
+        <p><code>ASC</code> is ascending (default, can be omitted), <code>DESC</code> is descending. You can sort by multiple columns — the second one breaks ties in the first.</p>
+        <div class="code-example">SELECT name, category, price
+FROM products
+ORDER BY category ASC, price DESC;</div>
+        <h3>LIMIT and OFFSET</h3>
+        <p><code>LIMIT</code> caps the rows returned. <code>OFFSET</code> skips the first N rows — useful for pagination.</p>
+        <div class="code-example">-- Top 3 most expensive products
+SELECT name, price FROM products
+ORDER BY price DESC
+LIMIT 3;
+
+-- The 11th through 20th most expensive
+SELECT name, price FROM products
+ORDER BY price DESC
+LIMIT 10 OFFSET 10;</div>
+        <h3>Ordering by columns you didn't select</h3>
+        <p>Perfectly legal. You can ORDER BY any column in the table, whether or not it's in your SELECT list.</p>
+      </div>
+    `,
+    starter:`-- The 5 newest customers
+SELECT name, signup_date, country
+FROM customers
+ORDER BY signup_date DESC
+LIMIT 5;`,
+    exercises:[
+      { prompt:'Show the 10 cheapest products still in stock (stock > 0), from cheapest to most expensive.',
+        solution:`SELECT name, price, stock FROM products
+WHERE stock > 0
+ORDER BY price ASC
+LIMIT 10;` },
+      { prompt:'Return the 3 largest orders. Show customer_id, order_date, and total.',
+        solution:`SELECT customer_id, order_date, total FROM orders
+ORDER BY total DESC
+LIMIT 3;` },
+    ]
+  },
+
+  { day:'sat', num:'04', title:'Aggregations and GROUP BY',
+    kicker:'Module 4 · Aggregates',
+    heading:'The Art of Counting',
+    dek:'SELECT returns rows. Aggregate functions collapse many rows into one number: a count, a sum, an average. Add GROUP BY, and you can compute that number for every category at once.',
+    content:`
+      <div class="section">
+        <p class="lead">Aggregate functions are how SQL summarizes. They take a whole column — potentially thousands of rows — and return a single value.</p>
+        <ul>
+          <li><code>COUNT(*)</code> — number of rows</li>
+          <li><code>COUNT(column)</code> — number of non-NULL values in that column</li>
+          <li><code>SUM(column)</code> — total</li>
+          <li><code>AVG(column)</code> — mean</li>
+          <li><code>MIN(column)</code>, <code>MAX(column)</code> — extremes</li>
+        </ul>
+        <div class="code-example">SELECT COUNT(*) AS total_orders,
+       AVG(total) AS avg_order_value,
+       MAX(total) AS biggest_order
+FROM orders;</div>
+        <p><code>AS</code> renames a column in the output. Use it. Columns named <code>AVG(total)</code> get old fast.</p>
+        <h3>GROUP BY: aggregate per category</h3>
+        <p>This is the move. Instead of one number across all rows, get one number <em>per group</em>.</p>
+        <div class="code-example">SELECT category,
+       COUNT(*) AS num_products,
+       AVG(price) AS avg_price
+FROM products
+GROUP BY category;</div>
+        <p>Rule: in a GROUP BY query, every column in the SELECT list must either be <em>grouped on</em> or <em>inside an aggregate function</em>. If you break this, the database will yell at you (or worse, in some dialects, silently give you nonsense).</p>
+        <h3>HAVING: filtering groups</h3>
+        <p>WHERE filters rows <em>before</em> grouping. HAVING filters groups <em>after</em>. You can't put an aggregate in a WHERE clause — use HAVING instead.</p>
+        <div class="code-example">SELECT category, COUNT(*) AS n
+FROM products
+GROUP BY category
+HAVING COUNT(*) &gt; 5;</div>
+      </div>
+
+      <div class="callout">
+        <span class="callout-label">Mental Model</span>
+        The query engine processes clauses in this order: FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT. Knowing this order makes errors like "can't use an alias in WHERE" suddenly obvious.
+      </div>
+    `,
+    starter:`-- Number of orders per status, biggest first
+SELECT status, COUNT(*) AS n, SUM(total) AS revenue
+FROM orders
+GROUP BY status
+ORDER BY n DESC;`,
+    exercises:[
+      { prompt:'Count the number of customers in each country. Sort by count, descending.',
+        solution:`SELECT country, COUNT(*) AS num_customers
+FROM customers
+GROUP BY country
+ORDER BY num_customers DESC;` },
+      { prompt:'For each product category, return the minimum price, maximum price, and average price.',
+        solution:`SELECT category,
+       MIN(price) AS cheapest,
+       MAX(price) AS priciest,
+       ROUND(AVG(price), 2) AS avg_price
+FROM products
+GROUP BY category;` },
+      { prompt:'Find countries with more than 3 customers. Show country and count.',
+        solution:`SELECT country, COUNT(*) AS n
+FROM customers
+GROUP BY country
+HAVING COUNT(*) > 3
+ORDER BY n DESC;` },
+    ]
+  },
+
+  { day:'sat', num:'05', title:'Joining Tables',
+    kicker:'Module 5 · JOINs',
+    heading:'Joining Tables',
+    dek:'Real databases don\'t keep everything in one table — they spread related information across many. JOIN is how you put it back together.',
+    content:`
+      <div class="section">
+        <p class="lead">Our database has <strong>orders</strong> and <strong>customers</strong> in separate tables. Each order has a <code>customer_id</code> that points to a row in customers. To see both together, you join.</p>
+        <div class="code-example">SELECT o.order_date, o.total, c.name, c.country
+FROM orders AS o
+INNER JOIN customers AS c
+  ON o.customer_id = c.id;</div>
+        <p>Breaking this down:</p>
+        <ul>
+          <li><code>FROM orders AS o</code> — start with the orders table, nickname it <code>o</code></li>
+          <li><code>INNER JOIN customers AS c</code> — glue it to customers, nicknamed <code>c</code></li>
+          <li><code>ON o.customer_id = c.id</code> — the matching rule</li>
+        </ul>
+        <h3>Types of JOIN</h3>
+        <p><strong>INNER JOIN</strong> — only rows that match on both sides. (<em>The default, if you write just</em> <code>JOIN</code>.)</p>
+        <p><strong>LEFT JOIN</strong> — all rows from the left table; rows from the right table where they match, NULL otherwise. Used constantly when you want "all X, and their Y if they have one."</p>
+        <p><strong>RIGHT JOIN</strong> — the mirror image. (SQLite added this recently; some older dialects don't support it. You can always rewrite as LEFT JOIN by swapping the tables.)</p>
+        <p><strong>FULL OUTER JOIN</strong> — all rows from both sides. Less common.</p>
+        <div class="code-example">-- All customers, plus their orders if any
+SELECT c.name, o.order_date, o.total
+FROM customers AS c
+LEFT JOIN orders AS o
+  ON c.id = o.customer_id;</div>
+        <h3>Joining three (or more) tables</h3>
+        <p>Keep adding JOINs. Each one is independent, with its own ON clause.</p>
+        <div class="code-example">SELECT c.name, p.name AS product, oi.quantity
+FROM customers c
+JOIN orders o ON o.customer_id = c.id
+JOIN order_items oi ON oi.order_id = o.id
+JOIN products p ON p.id = oi.product_id;</div>
+      </div>
+      <div class="callout">
+        <span class="callout-label">Always Alias</span>
+        Once you have two or more tables in play, aliases aren't optional — they're hygiene. <code>orders o</code> is shorter than <code>orders</code>, and if two tables both have an <code>id</code> column, qualifying with the alias is the only way to tell them apart.
+      </div>
+    `,
+    starter:`-- Who bought what, and for how much
+SELECT c.name, o.order_date, o.total
+FROM orders o
+JOIN customers c ON o.customer_id = c.id
+ORDER BY o.total DESC
+LIMIT 10;`,
+    exercises:[
+      { prompt:'List every order with the customer\'s name and country. Only show orders with status "shipped". Newest first.',
+        solution:`SELECT c.name, c.country, o.order_date, o.total
+FROM orders o
+JOIN customers c ON c.id = o.customer_id
+WHERE o.status = 'shipped'
+ORDER BY o.order_date DESC;` },
+      { prompt:'Show all customers and — if they have any — their total number of orders. Customers with no orders should appear with 0.',
+        solution:`SELECT c.name, COUNT(o.id) AS num_orders
+FROM customers c
+LEFT JOIN orders o ON o.customer_id = c.id
+GROUP BY c.id, c.name
+ORDER BY num_orders DESC;` },
+      { prompt:'For each order, list the customer name and every product they bought. Show customer name, order_id, product name, and quantity.',
+        solution:`SELECT c.name, o.id AS order_id, p.name AS product, oi.quantity
+FROM orders o
+JOIN customers c ON c.id = o.customer_id
+JOIN order_items oi ON oi.order_id = o.id
+JOIN products p ON p.id = oi.product_id
+ORDER BY o.id;` },
+    ]
+  },
+
+  // SUNDAY
+  { day:'sun', num:'06', title:'Subqueries',
+    kicker:'Module 6 · Nested Queries',
+    heading:'Queries Inside Queries',
+    dek:'A subquery is a SELECT written inside another SELECT. It\'s how you use the result of one question to ask another.',
+    content:`
+      <div class="section">
+        <p class="lead">Say you want "all products priced above the average." You need two things: the average, and the products above it. A subquery lets you do both in one query.</p>
+        <div class="code-example">SELECT name, price
+FROM products
+WHERE price &gt; (SELECT AVG(price) FROM products);</div>
+        <p>The inner query <code>SELECT AVG(price) FROM products</code> runs first, produces a single number. The outer query then filters against it.</p>
+        <h3>Three places a subquery can live</h3>
+        <p><strong>In WHERE</strong> — filtering against computed values (the example above).</p>
+        <p><strong>In FROM</strong> — treat a query result as a temporary table.</p>
+        <div class="code-example">SELECT country, AVG(order_count) AS avg_orders
+FROM (
+  SELECT c.country, COUNT(o.id) AS order_count
+  FROM customers c
+  LEFT JOIN orders o ON o.customer_id = c.id
+  GROUP BY c.id, c.country
+) AS per_customer
+GROUP BY country;</div>
+        <p><strong>In SELECT</strong> — a scalar value computed per row. Use sparingly; JOINs are usually clearer.</p>
+        <h3>IN with a subquery</h3>
+        <p>A classic pattern: find rows whose ID appears in some other set.</p>
+        <div class="code-example">-- Products that have actually been ordered
+SELECT name FROM products
+WHERE id IN (SELECT DISTINCT product_id FROM order_items);</div>
+        <h3>Correlated subqueries</h3>
+        <p>A correlated subquery references the outer query — it gets re-evaluated for each outer row. Powerful, sometimes slow. Here: customers whose biggest order beat the country average.</p>
+        <div class="code-example">SELECT c.name, c.country
+FROM customers c
+WHERE (SELECT MAX(o.total) FROM orders o WHERE o.customer_id = c.id) &gt;
+      (SELECT AVG(o2.total) FROM orders o2
+       JOIN customers c2 ON c2.id = o2.customer_id
+       WHERE c2.country = c.country);</div>
+      </div>
+      <div class="callout">
+        <span class="callout-label">When to Use</span>
+        If you can do it with a JOIN, you probably should — JOINs are easier to optimize. Reach for subqueries when the logic genuinely needs a computed value (averages, maxes, existence checks) that a JOIN can't express cleanly.
+      </div>
+    `,
+    starter:`-- Products priced above the overall average
+SELECT name, price,
+       (SELECT ROUND(AVG(price), 2) FROM products) AS avg_price
+FROM products
+WHERE price > (SELECT AVG(price) FROM products)
+ORDER BY price DESC;`,
+    exercises:[
+      { prompt:'Find customers who have never placed an order. (Hint: NOT IN with a subquery, or a LEFT JOIN with IS NULL.)',
+        solution:`SELECT name, email FROM customers
+WHERE id NOT IN (SELECT DISTINCT customer_id FROM orders WHERE customer_id IS NOT NULL);
+
+-- Or equivalently:
+-- SELECT c.name, c.email
+-- FROM customers c
+-- LEFT JOIN orders o ON o.customer_id = c.id
+-- WHERE o.id IS NULL;` },
+      { prompt:'List every product whose price is above the average price for its own category. Show name, category, price.',
+        solution:`SELECT p.name, p.category, p.price
+FROM products p
+WHERE p.price > (
+  SELECT AVG(p2.price)
+  FROM products p2
+  WHERE p2.category = p.category
+)
+ORDER BY p.category, p.price DESC;` },
+    ]
+  },
+
+  { day:'sun', num:'07', title:'CTEs — The WITH Clause',
+    kicker:'Module 7 · Common Table Expressions',
+    heading:'The WITH Clause',
+    dek:'Subqueries make queries powerful; CTEs make them readable. You name an intermediate result, then reference it by name. It\'s the single biggest quality-of-life upgrade in modern SQL.',
+    content:`
+      <div class="section">
+        <p class="lead">A CTE (Common Table Expression) is a named subquery that lives at the top of your statement. You build your query in stages, each stage clearly labeled.</p>
+        <div class="code-example">WITH customer_totals AS (
+  SELECT customer_id, SUM(total) AS lifetime_value
+  FROM orders
+  GROUP BY customer_id
+)
+SELECT c.name, ct.lifetime_value
+FROM customers c
+JOIN customer_totals ct ON ct.customer_id = c.id
+ORDER BY ct.lifetime_value DESC
+LIMIT 10;</div>
+        <p>Read that top-to-bottom. First, compute each customer's lifetime value. Then, join that against customers to get names, sort, and take the top 10. It's prose.</p>
+        <h3>Multiple CTEs</h3>
+        <p>Chain them with commas. Each can reference the ones defined before it.</p>
+        <div class="code-example">WITH
+  big_spenders AS (
+    SELECT customer_id, SUM(total) AS lv
+    FROM orders
+    GROUP BY customer_id
+    HAVING SUM(total) &gt; 1000
+  ),
+  their_countries AS (
+    SELECT c.country, COUNT(*) AS n
+    FROM customers c
+    JOIN big_spenders b ON b.customer_id = c.id
+    GROUP BY c.country
+  )
+SELECT * FROM their_countries ORDER BY n DESC;</div>
+        <h3>Recursive CTEs</h3>
+        <p>A CTE that references itself. Use case: hierarchies — an org chart, a category tree, a graph traversal. Here: everyone who reports (directly or transitively) up to employee 1.</p>
+        <div class="code-example">WITH RECURSIVE chain AS (
+  SELECT id, name, manager_id, 0 AS depth
+  FROM employees
+  WHERE id = 1
+  UNION ALL
+  SELECT e.id, e.name, e.manager_id, c.depth + 1
+  FROM employees e
+  JOIN chain c ON e.manager_id = c.id
+)
+SELECT * FROM chain;</div>
+      </div>
+      <div class="callout">
+        <span class="callout-label">Style</span>
+        When a query grows past 15–20 lines, pause and refactor into CTEs. Each CTE should do one thing and have a name that describes that thing. "What does this query do?" should be answerable just by reading the CTE names.
+      </div>
+    `,
+    starter:`-- Top 5 customers by lifetime value, with country
+WITH lifetime AS (
+  SELECT customer_id, SUM(total) AS lv, COUNT(*) AS orders
+  FROM orders
+  GROUP BY customer_id
+)
+SELECT c.name, c.country, l.lv, l.orders
+FROM lifetime l
+JOIN customers c ON c.id = l.customer_id
+ORDER BY l.lv DESC
+LIMIT 5;`,
+    exercises:[
+      { prompt:'Using a CTE: for each category, find the most expensive product. Show category, product name, and price.',
+        solution:`WITH max_per_cat AS (
+  SELECT category, MAX(price) AS top_price
+  FROM products
+  GROUP BY category
+)
+SELECT p.category, p.name, p.price
+FROM products p
+JOIN max_per_cat m
+  ON m.category = p.category
+  AND m.top_price = p.price
+ORDER BY p.category;` },
+      { prompt:'Use two CTEs to find customers whose lifetime spending is above the overall average lifetime spending.',
+        solution:`WITH
+  customer_lv AS (
+    SELECT customer_id, SUM(total) AS lv
+    FROM orders
+    GROUP BY customer_id
+  ),
+  overall AS (
+    SELECT AVG(lv) AS avg_lv FROM customer_lv
+  )
+SELECT c.name, cl.lv
+FROM customer_lv cl
+JOIN customers c ON c.id = cl.customer_id
+CROSS JOIN overall o
+WHERE cl.lv > o.avg_lv
+ORDER BY cl.lv DESC;` },
+    ]
+  },
+
+  { day:'sun', num:'08', title:'Window Functions',
+    kicker:'Module 8 · OVER(), PARTITION BY',
+    heading:'Windows',
+    dek:'A window function computes a value across a set of rows — like an aggregate — but without collapsing them. The rows stay; you just get a new column. This is the concept that separates intermediate SQL from advanced SQL.',
+    content:`
+      <div class="section">
+        <p class="lead">Regular aggregates collapse rows: SUM, AVG, COUNT with GROUP BY all turn many rows into one. Window functions compute the same values <em>without</em> collapsing. Each row keeps its identity and gets a new computed column alongside it.</p>
+        <div class="code-example">SELECT name, category, price,
+       AVG(price) OVER (PARTITION BY category) AS cat_avg
+FROM products;</div>
+        <p>Every row stays. Each gets a new column: the average price of its own category.</p>
+        <h3>Anatomy of OVER()</h3>
+        <ul>
+          <li><code>PARTITION BY column</code> — split rows into groups (optional — without it, the window is the whole result)</li>
+          <li><code>ORDER BY column</code> — order within the partition (needed for ranking and running totals)</li>
+        </ul>
+        <h3>Ranking functions</h3>
+        <ul>
+          <li><code>ROW_NUMBER()</code> — 1, 2, 3, 4, 5… always unique</li>
+          <li><code>RANK()</code> — 1, 2, 2, 4, 5… ties share, leave gaps</li>
+          <li><code>DENSE_RANK()</code> — 1, 2, 2, 3, 4… ties share, no gaps</li>
+        </ul>
+        <div class="code-example">-- Top 3 products per category
+SELECT category, name, price, rnk FROM (
+  SELECT category, name, price,
+         ROW_NUMBER() OVER (PARTITION BY category ORDER BY price DESC) AS rnk
+  FROM products
+)
+WHERE rnk &lt;= 3;</div>
+        <h3>LAG and LEAD</h3>
+        <p>Reach back (or forward) in the ordered window. Great for computing deltas.</p>
+        <div class="code-example">SELECT order_date, total,
+       LAG(total) OVER (ORDER BY order_date) AS prev_total,
+       total - LAG(total) OVER (ORDER BY order_date) AS delta
+FROM orders;</div>
+        <h3>Running totals</h3>
+        <p>Aggregate + ORDER BY in a window = running total.</p>
+        <div class="code-example">SELECT order_date, total,
+       SUM(total) OVER (ORDER BY order_date) AS running_total
+FROM orders
+ORDER BY order_date;</div>
+      </div>
+      <div class="callout">
+        <span class="callout-label">Why it's a superpower</span>
+        Window functions replace ten lines of correlated subqueries with one. "Top N per group," "running totals," "percentile rank," "month-over-month change" — all one-liners with windows. If you learn exactly one advanced SQL concept this weekend, make it this one.
+      </div>
+    `,
+    starter:`-- Rank customers by spending within their country
+WITH customer_lv AS (
+  SELECT c.id, c.name, c.country, COALESCE(SUM(o.total), 0) AS lv
+  FROM customers c
+  LEFT JOIN orders o ON o.customer_id = c.id
+  GROUP BY c.id, c.name, c.country
+)
+SELECT country, name, lv,
+       RANK() OVER (PARTITION BY country ORDER BY lv DESC) AS country_rank
+FROM customer_lv
+ORDER BY country, country_rank;`,
+    exercises:[
+      { prompt:'For each product category, show products ranked 1 (cheapest) to N (priciest). Include category, name, price, and the rank.',
+        solution:`SELECT category, name, price,
+       ROW_NUMBER() OVER (PARTITION BY category ORDER BY price ASC) AS price_rank
+FROM products
+ORDER BY category, price_rank;` },
+      { prompt:'Build a running total of daily revenue, ordered by order_date.',
+        solution:`SELECT order_date,
+       SUM(total) AS day_revenue,
+       SUM(SUM(total)) OVER (ORDER BY order_date) AS running_revenue
+FROM orders
+GROUP BY order_date
+ORDER BY order_date;` },
+      { prompt:'For each order, show how its total compares to the previous order by the same customer (using LAG).',
+        solution:`SELECT customer_id, order_date, total,
+       LAG(total) OVER (PARTITION BY customer_id ORDER BY order_date) AS prev_total,
+       total - LAG(total) OVER (PARTITION BY customer_id ORDER BY order_date) AS change
+FROM orders
+ORDER BY customer_id, order_date;` },
+    ]
+  },
+
+  { day:'sun', num:'09', title:'Modifying Data',
+    kicker:'Module 9 · INSERT, UPDATE, DELETE',
+    heading:'Writing, Not Just Reading',
+    dek:'SELECT is the vast majority of what you\'ll write. But knowing how to insert, update, and delete — safely — is part of the job.',
+    content:`
+      <div class="section">
+        <p class="lead">Three statements cover changes to data. They look simple. They are also how people accidentally destroy production databases.</p>
+        <h3>INSERT</h3>
+        <div class="code-example">INSERT INTO customers (name, email, city, country, signup_date)
+VALUES ('Dana Kim', 'dana@example.com', 'Seoul', 'South Korea', '2026-04-01');</div>
+        <p>You can insert many rows at once:</p>
+        <div class="code-example">INSERT INTO products (name, category, price, stock) VALUES
+  ('Notebook', 'Stationery', 6.50, 200),
+  ('Pen',      'Stationery', 2.00, 500);</div>
+        <h3>UPDATE</h3>
+        <div class="code-example">UPDATE products
+SET price = price * 0.9
+WHERE category = 'Books';</div>
+        <h3>DELETE</h3>
+        <div class="code-example">DELETE FROM orders WHERE status = 'cancelled';</div>
+      </div>
+      <div class="callout">
+        <span class="callout-label">The One Rule</span>
+        Always, always run the SELECT version first. Before an UPDATE or DELETE, write <code>SELECT * FROM t WHERE ...</code> with the same WHERE clause and make sure the rows you see are exactly the rows you want to change. A missing WHERE turns <code>DELETE FROM orders</code> into "delete every order." Ask anyone.
+      </div>
+      <div class="section">
+        <h3>Try It</h3>
+        <p>Go ahead and modify the database. Your changes persist in this session until you reload. If something goes wrong, click "Reload Database" to restore the original data.</p>
+      </div>
+    `,
+    starter:`-- Insert a new product
+INSERT INTO products (name, category, price, stock)
+VALUES ('SQL Weekend Mug', 'Merch', 18.00, 50);
+
+-- Verify
+SELECT * FROM products WHERE name = 'SQL Weekend Mug';`,
+    exercises:[
+      { prompt:'Increase the price of all products in the "Electronics" category by 5%. Then run a SELECT to verify.',
+        solution:`UPDATE products SET price = ROUND(price * 1.05, 2)
+WHERE category = 'Electronics';
+
+SELECT name, price FROM products WHERE category = 'Electronics';` },
+      { prompt:'Delete all orders with a status of "cancelled". First, run a SELECT with the same WHERE to see what you\'re about to delete.',
+        solution:`-- Preview
+SELECT * FROM orders WHERE status = 'cancelled';
+
+-- Delete
+DELETE FROM orders WHERE status = 'cancelled';` },
+    ]
+  },
+
+  { day:'sun', num:'10', title:'The Final Challenges',
+    kicker:'Module 10 · Putting It All Together',
+    heading:'The Final Challenges',
+    dek:'Five real-world-shaped problems. They use everything: joins, aggregates, CTEs, windows. Try each one before checking the solution. If you can do these unaided, you\'ve relearned SQL.',
+    content:`
+      <div class="section">
+        <p class="lead">No new concepts. Just problems. These are the kind of questions you\'d get on a data-analyst interview or pulled from a real product meeting — phrased the way humans actually phrase them.</p>
+        <p>Work them in the editor. Don\'t peek at solutions until you\'ve made a real attempt.</p>
+      </div>
+    `,
+    starter:`-- Your scratchpad. Start with challenge 1 below.
+SELECT 1;`,
+    exercises:[
+      { prompt:'Monthly revenue for the last year. Show year-month and total revenue, ordered chronologically. Use strftime(\'%Y-%m\', order_date) to group by month.',
+        solution:`SELECT strftime('%Y-%m', order_date) AS month,
+       ROUND(SUM(total), 2) AS revenue
+FROM orders
+GROUP BY month
+ORDER BY month;` },
+      { prompt:'Top 3 customers per country by lifetime spending. Show country, rank, name, and lifetime total.',
+        solution:`WITH customer_lv AS (
+  SELECT c.country, c.name, SUM(o.total) AS lv
+  FROM customers c
+  JOIN orders o ON o.customer_id = c.id
+  GROUP BY c.id, c.country, c.name
+)
+SELECT country, name, lv, rnk FROM (
+  SELECT country, name, lv,
+         RANK() OVER (PARTITION BY country ORDER BY lv DESC) AS rnk
+  FROM customer_lv
+)
+WHERE rnk <= 3
+ORDER BY country, rnk;` },
+      { prompt:'For each product, show how many times it has been ordered and total units sold. Products that have never been ordered should appear with zeros.',
+        solution:`SELECT p.name, p.category,
+       COUNT(oi.id) AS times_ordered,
+       COALESCE(SUM(oi.quantity), 0) AS units_sold
+FROM products p
+LEFT JOIN order_items oi ON oi.product_id = p.id
+GROUP BY p.id, p.name, p.category
+ORDER BY units_sold DESC;` },
+      { prompt:'Find "repeat customers": customers who have placed more than one order. Show name, order count, and days between their first and most recent order.',
+        solution:`SELECT c.name,
+       COUNT(*) AS orders,
+       MIN(o.order_date) AS first_order,
+       MAX(o.order_date) AS last_order,
+       CAST(julianday(MAX(o.order_date)) - julianday(MIN(o.order_date)) AS INTEGER) AS days_span
+FROM customers c
+JOIN orders o ON o.customer_id = c.id
+GROUP BY c.id, c.name
+HAVING COUNT(*) > 1
+ORDER BY orders DESC, days_span DESC;` },
+      { prompt:'For each customer who has placed at least one order, show their name, their most recent order total, and the difference from their previous order.',
+        solution:`WITH ordered AS (
+  SELECT c.name, o.order_date, o.total,
+         ROW_NUMBER() OVER (PARTITION BY c.id ORDER BY o.order_date DESC) AS rn,
+         LAG(o.total) OVER (PARTITION BY c.id ORDER BY o.order_date) AS prev_total
+  FROM customers c
+  JOIN orders o ON o.customer_id = c.id
+)
+SELECT name, order_date AS most_recent, total, prev_total,
+       total - COALESCE(prev_total, 0) AS change
+FROM ordered
+WHERE rn = 1
+ORDER BY change DESC;` },
+    ]
+  },
+];
+
+// ============================================================
+// DATABASE SETUP
+// ============================================================
+const DB_SEED = `
+CREATE TABLE customers (
+  id INTEGER PRIMARY KEY,
+  name TEXT NOT NULL,
+  email TEXT,
+  city TEXT,
+  country TEXT,
+  signup_date DATE
+);
+
+CREATE TABLE products (
+  id INTEGER PRIMARY KEY,
+  name TEXT NOT NULL,
+  category TEXT,
+  price REAL,
+  stock INTEGER
+);
+
+CREATE TABLE orders (
+  id INTEGER PRIMARY KEY,
+  customer_id INTEGER,
+  order_date DATE,
+  status TEXT,
+  total REAL,
+  FOREIGN KEY (customer_id) REFERENCES customers(id)
+);
+
+CREATE TABLE order_items (
+  id INTEGER PRIMARY KEY,
+  order_id INTEGER,
+  product_id INTEGER,
+  quantity INTEGER,
+  unit_price REAL,
+  FOREIGN KEY (order_id) REFERENCES orders(id),
+  FOREIGN KEY (product_id) REFERENCES products(id)
+);
+
+CREATE TABLE employees (
+  id INTEGER PRIMARY KEY,
+  name TEXT NOT NULL,
+  department TEXT,
+  salary REAL,
+  manager_id INTEGER,
+  hire_date DATE,
+  FOREIGN KEY (manager_id) REFERENCES employees(id)
+);
+
+INSERT INTO customers (id, name, email, city, country, signup_date) VALUES
+(1,'Sean Leone','sean@example.com','Brooklyn','USA','2022-01-15'),
+(2,'Ava Martinez','ava@example.com','Austin','USA','2022-03-02'),
+(3,'Liam Chen','liam@example.com','Toronto','Canada','2022-04-18'),
+(4,'Sofia Rossi','sofia@example.com','Milan','Italy','2022-06-10'),
+(5,'Noah Kim','noah@example.com','Seoul','South Korea','2022-07-22'),
+(6,'Mia Okafor','mia@example.com','Lagos','Nigeria','2022-09-05'),
+(7,'Ethan Nguyen','ethan@example.com','Hanoi','Vietnam','2022-10-19'),
+(8,'Isabella Schmidt','isa@example.com','Berlin','Germany','2023-01-08'),
+(9,'Lucas Silva','lucas@example.com','Sao Paulo','Brazil','2023-02-14'),
+(10,'Charlotte Patel','char@example.com','London','UK','2023-03-28'),
+(11,'Oliver Tanaka','oliver@example.com','Tokyo','Japan','2023-05-11'),
+(12,'Amelia Dubois','amelia@example.com','Paris','France','2023-06-24'),
+(13,'Benjamin Cohen','ben@example.com','Tel Aviv','Israel','2023-08-07'),
+(14,'Harper Singh','harper@example.com','Mumbai','India','2023-09-20'),
+(15,'James O''Connor','james@example.com','Dublin','Ireland','2023-11-02'),
+(16,'Sadie Park','sadie@example.com','Brooklyn','USA','2023-12-15'),
+(17,'Mateo Garcia','mateo@example.com','Mexicali','Mexico','2024-01-28'),
+(18,'Evelyn Brown','evelyn@example.com','Sydney','Australia','2024-03-12'),
+(19,'Henry Ivanov','henry@example.com','Moscow','Russia','2024-04-25'),
+(20,'Abigail Moore','abi@example.com','Los Angeles','USA','2024-06-08'),
+(21,'Sebastian Müller','seb@example.com','Munich','Germany','2024-07-21'),
+(22,'Emily Wong','emily@example.com','Hong Kong','Hong Kong','2024-09-03'),
+(23,'Daniel Lopez','daniel@example.com','Madrid','Spain','2024-10-16'),
+(24,'Avery Johnson','avery@example.com','Chicago','USA','2024-11-29'),
+(25,'Jack Fitzgerald','jack@example.com','Cork','Ireland','2025-01-11'),
+(26,'Madison Lee','madison@example.com','San Diego','USA','2025-02-24'),
+(27,'Logan White','logan@example.com','Vancouver','Canada','2025-04-08'),
+(28,'Grace Yamamoto','grace@example.com','Osaka','Japan','2025-05-21'),
+(29,'Wyatt Brooks',NULL,'Portland','USA','2025-07-03'),
+(30,'Layla Hassan','layla@example.com','Cairo','Egypt','2025-08-16');
+
+INSERT INTO products (id, name, category, price, stock) VALUES
+(1,'Wireless Headphones','Electronics',149.99,42),
+(2,'Mechanical Keyboard','Electronics',129.00,30),
+(3,'USB-C Hub','Electronics',39.50,120),
+(4,'Portable SSD 1TB','Electronics',110.00,55),
+(5,'Smart Watch','Electronics',249.00,18),
+(6,'Noise Cancelling Earbuds','Electronics',199.00,0),
+(7,'Laptop Stand','Electronics',45.00,88),
+(8,'4K Monitor','Electronics',399.00,12),
+(9,'Designing Data-Intensive Apps','Books',54.99,40),
+(10,'The Pragmatic Programmer','Books',42.00,65),
+(11,'Clean Code','Books',38.50,52),
+(12,'Atomic Habits','Books',17.00,200),
+(13,'Deep Work','Books',19.99,150),
+(14,'SQL for Smarties','Books',49.00,28),
+(15,'Running Shoes','Apparel',95.00,110),
+(16,'Wool Sweater','Apparel',120.00,34),
+(17,'Denim Jacket','Apparel',140.00,22),
+(18,'T-Shirt (Black)','Apparel',24.00,300),
+(19,'Linen Shirt','Apparel',68.00,45),
+(20,'Coffee Beans 1lb','Pantry',22.00,180),
+(21,'Olive Oil 500ml','Pantry',18.50,95),
+(22,'Sea Salt Flakes','Pantry',11.00,140),
+(23,'Sparkling Water (12pk)','Pantry',15.00,220),
+(24,'Dark Chocolate Bar','Pantry',6.50,400),
+(25,'Cast Iron Skillet','Home',75.00,48),
+(26,'Linen Sheets','Home',180.00,0),
+(27,'Ceramic Vase','Home',48.00,60),
+(28,'Wool Throw Blanket','Home',110.00,25),
+(29,'Desk Lamp','Home',89.00,33),
+(30,'Leather Notebook','Stationery',28.00,220),
+(31,'Fountain Pen','Stationery',85.00,40),
+(32,'Sticky Notes Pack','Stationery',7.50,500);
+
+INSERT INTO orders (id, customer_id, order_date, status, total) VALUES
+(1,1,'2025-06-02','shipped',168.99),
+(2,1,'2025-09-14','shipped',84.50),
+(3,1,'2026-01-20','shipped',425.00),
+(4,1,'2026-03-11','shipped',52.00),
+(5,2,'2025-04-08','shipped',329.00),
+(6,2,'2025-07-19','shipped',42.00),
+(7,3,'2025-03-22','shipped',110.00),
+(8,3,'2025-10-05','shipped',249.00),
+(9,4,'2025-05-17','shipped',195.00),
+(10,5,'2025-06-28','cancelled',399.00),
+(11,5,'2025-11-12','shipped',179.99),
+(12,6,'2025-04-30','shipped',45.00),
+(13,7,'2025-08-14','pending',89.00),
+(14,8,'2025-02-18','shipped',68.00),
+(15,8,'2025-09-03','shipped',140.00),
+(16,9,'2025-07-07','shipped',22.00),
+(17,10,'2025-05-29','shipped',320.00),
+(18,10,'2025-12-15','shipped',75.00),
+(19,11,'2025-06-11','shipped',249.00),
+(20,11,'2026-02-04','shipped',54.99),
+(21,12,'2025-08-23','shipped',130.50),
+(22,13,'2025-09-08','cancelled',399.00),
+(23,14,'2025-10-22','shipped',68.00),
+(24,14,'2026-01-05','shipped',24.00),
+(25,15,'2025-11-19','shipped',149.99),
+(26,16,'2025-12-28','shipped',195.00),
+(27,17,'2026-01-15','shipped',42.00),
+(28,17,'2026-03-02','pending',180.00),
+(29,18,'2025-08-30','shipped',89.00),
+(30,19,'2025-10-10','shipped',110.00),
+(31,20,'2025-12-02','shipped',249.00),
+(32,20,'2026-02-19','shipped',329.00),
+(33,21,'2026-01-24','shipped',42.00),
+(34,22,'2026-03-08','pending',68.00),
+(35,23,'2025-11-27','shipped',95.00),
+(36,24,'2026-02-12','shipped',150.50),
+(37,25,'2026-03-20','shipped',38.50),
+(38,26,'2026-04-01','shipped',249.00),
+(39,27,'2026-04-10','pending',110.00),
+(40,1,'2026-04-15','shipped',199.00);
+
+INSERT INTO order_items (order_id, product_id, quantity, unit_price) VALUES
+(1,1,1,149.99),(1,30,1,19.00),
+(2,3,1,39.50),(2,20,2,22.50),
+(3,8,1,399.00),(3,25,1,26.00),
+(4,9,1,52.00),
+(5,5,1,249.00),(5,15,1,80.00),
+(6,10,1,42.00),
+(7,4,1,110.00),
+(8,5,1,249.00),
+(9,17,1,140.00),(9,19,1,55.00),
+(10,8,1,399.00),
+(11,1,1,149.99),(11,32,2,15.00),
+(12,7,1,45.00),
+(13,29,1,89.00),
+(14,19,1,68.00),
+(15,17,1,140.00),
+(16,20,1,22.00),
+(17,16,1,120.00),(17,28,1,110.00),(17,27,2,45.00),
+(18,25,1,75.00),
+(19,5,1,249.00),
+(20,9,1,54.99),
+(21,2,1,129.00),(21,24,1,1.50),
+(22,8,1,399.00),
+(23,19,1,68.00),
+(24,18,1,24.00),
+(25,1,1,149.99),
+(26,17,1,140.00),(26,19,1,55.00),
+(27,10,1,42.00),
+(28,26,1,180.00),
+(29,29,1,89.00),
+(30,4,1,110.00),
+(31,5,1,249.00),
+(32,5,1,249.00),(32,30,1,28.00),(32,24,8,6.50),
+(33,10,1,42.00),
+(34,19,1,68.00),
+(35,15,1,95.00),
+(36,28,1,110.00),(36,20,1,22.00),(36,22,1,18.50),
+(37,11,1,38.50),
+(38,5,1,249.00),
+(39,4,1,110.00),
+(40,6,1,199.00);
+
+INSERT INTO employees (id, name, department, salary, manager_id, hire_date) VALUES
+(1,'Olivia Reed','Executive',220000,NULL,'2020-01-10'),
+(2,'Marcus Hill','Engineering',180000,1,'2020-03-15'),
+(3,'Priya Shah','Operations',160000,1,'2020-04-02'),
+(4,'Diego Alvarez','Engineering',140000,2,'2021-02-18'),
+(5,'Nora Becker','Engineering',135000,2,'2021-05-07'),
+(6,'Tomás Rivera','Engineering',120000,4,'2022-01-12'),
+(7,'Hana Yoshida','Operations',115000,3,'2021-09-20'),
+(8,'Leo Fontaine','Operations',95000,7,'2022-06-30'),
+(9,'Zara Okonkwo','Design',130000,1,'2020-11-05'),
+(10,'Kai Henriksson','Design',105000,9,'2022-03-14');
+`;
+
+let SQL, db;
+const state = {
+  currentLesson: 0,
+  completed: new Set(),
+  solutionsOpen: new Set(),
+};
+
+// Persistent storage (localStorage — works anywhere the page is hosted)
+function loadProgress() {
+  try {
+    const raw = localStorage.getItem('sql_weekend_progress');
+    if (raw) {
+      const data = JSON.parse(raw);
+      state.currentLesson = data.currentLesson || 0;
+      state.completed = new Set(data.completed || []);
+    }
+  } catch(e) { /* first visit, no storage yet */ }
+}
+function saveProgress() {
+  try {
+    localStorage.setItem('sql_weekend_progress', JSON.stringify({
+      currentLesson: state.currentLesson,
+      completed: [...state.completed],
+    }));
+  } catch(e) { console.warn('Could not save progress', e) }
+}
+function resetProgress() {
+  if (!confirm('Reset all progress? This clears your completed lessons.')) return;
+  state.currentLesson = 0;
+  state.completed = new Set();
+  saveProgress();
+  loadDatabase();
+  renderSidebar();
+  renderLesson();
+}
+
+// DB init
+async function initSQL() {
+  SQL = await initSqlJs({
+    locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/${f}`
+  });
+  loadDatabase();
+}
+function loadDatabase() {
+  db = new SQL.Database();
+  db.exec(DB_SEED);
+}
+function runQuery(sql) {
+  try {
+    const res = db.exec(sql);
+    return { ok: true, results: res };
+  } catch(e) {
+    return { ok: false, error: e.message };
+  }
+}
+
+// Rendering
+function renderMasthead() {
+  const pct = (state.completed.size / lessons.length) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `Progress ${state.completed.size} / ${lessons.length}`;
+}
+
+function renderSidebar() {
+  const sat = document.getElementById('saturday-lessons');
+  const sun = document.getElementById('sunday-lessons');
+  sat.innerHTML = '';
+  sun.innerHTML = '';
+  lessons.forEach((l, i) => {
+    const item = document.createElement('div');
+    item.className = 'lesson-item' + (i === state.currentLesson ? ' active' : '');
+    const done = state.completed.has(i);
+    item.innerHTML = `
+      <span class="lesson-num">${l.num}</span>
+      <span class="lesson-title">${l.title}</span>
+      ${done ? '<span class="lesson-check">✓</span>' : ''}
+    `;
+    item.onclick = () => { state.currentLesson = i; renderLesson(); renderSidebar(); saveProgress(); };
+    if (l.day === 'sat') sat.appendChild(item); else sun.appendChild(item);
+  });
+  renderMasthead();
+}
+
+function renderLesson() {
+  const l = lessons[state.currentLesson];
+  const main = document.getElementById('main-content');
+  window.scrollTo({top:0, behavior:'smooth'});
+
+  // Special case: first lesson shows the schedule as intro
+  const isFirst = state.currentLesson === 0;
+  const scheduleBlock = isFirst ? `
+    <div class="section">
+      <h2>The Weekend Plan</h2>
+      <p>Ten lessons, split across two days. Saturday lays the foundation. Sunday ventures into the advanced stuff. Each lesson is designed to be ~30–60 minutes of focused work.</p>
+      <div class="schedule">
+        <div class="schedule-day">
+          <div class="schedule-day-title">Saturday</div>
+          <div class="schedule-day-meta">Foundations · ~4 hours</div>
+          <div class="schedule-items">
+            <span class="schedule-chip">01 · SELECT basics</span>
+            <span class="schedule-chip">02 · WHERE</span>
+            <span class="schedule-chip">03 · ORDER BY / LIMIT</span>
+            <span class="schedule-chip">04 · Aggregates &amp; GROUP BY</span>
+            <span class="schedule-chip">05 · JOINs</span>
+          </div>
+        </div>
+        <div class="schedule-day">
+          <div class="schedule-day-title">Sunday</div>
+          <div class="schedule-day-meta">Advanced · ~4 hours</div>
+          <div class="schedule-items">
+            <span class="schedule-chip">06 · Subqueries</span>
+            <span class="schedule-chip">07 · CTEs</span>
+            <span class="schedule-chip">08 · Window functions</span>
+            <span class="schedule-chip">09 · INSERT / UPDATE / DELETE</span>
+            <span class="schedule-chip">10 · Final challenges</span>
+          </div>
+        </div>
+      </div>
+      <p>Everything runs in your browser — no setup, no accounts, nothing to install. The database persists through the session; reload the page if you want a fresh copy. Your progress across lessons is saved automatically.</p>
+    </div>
+  ` : '';
+
+  main.innerHTML = `
+    <div class="article-header">
+      <div class="article-kicker">${l.kicker}</div>
+      <h1 class="article-title">${l.heading}</h1>
+      <p class="article-dek">${l.dek}</p>
+      <div class="article-meta">
+        <span>Lesson ${l.num} / 10</span>
+        <span>·</span>
+        <span>${l.day === 'sat' ? 'Saturday' : 'Sunday'}</span>
+      </div>
+    </div>
+    ${l.content}
+    ${scheduleBlock}
+
+    <div class="editor-block">
+      <div class="editor-header">
+        <span class="editor-header-label">▸ Try It — Live Query Editor</span>
+        <span style="opacity:0.6">SQLite · in-browser</span>
+      </div>
+      <textarea class="editor-textarea" id="editor" spellcheck="false">${l.starter}</textarea>
+      <div class="editor-actions">
+        <button onclick="executeQuery()">Run Query</button>
+        <button class="secondary" onclick="resetEditor()">Reset</button>
+        <button class="ghost" onclick="loadDatabase()">Reload Database</button>
+      </div>
+      <div id="results" class="results" style="display:none"></div>
+    </div>
+
+    ${l.exercises.map((ex, i) => `
+      <div class="exercise">
+        <div class="exercise-label">
+          <span>Exercise ${i+1}</span>
+          <button class="ghost" onclick="toggleSolution(${i})" style="padding:3px 10px;font-size:10px">Show Solution</button>
+        </div>
+        <div class="exercise-prompt">${ex.prompt}</div>
+        <button class="secondary" onclick="loadIntoEditor(${i})">Try in Editor ↑</button>
+        <div class="solution" id="solution-${i}">
+          <div class="solution-label">Solution</div>
+          <div class="code-example">${escapeHtml(ex.solution)}</div>
+        </div>
+      </div>
+    `).join('')}
+
+    <div class="lesson-nav">
+      ${state.currentLesson > 0 ? `
+        <div class="nav-btn" onclick="goto(${state.currentLesson-1})">
+          <span class="nav-label">← Previous</span>
+          <span class="nav-title">${lessons[state.currentLesson-1].title}</span>
+        </div>` : '<div></div>'}
+      ${state.currentLesson < lessons.length-1 ? `
+        <div class="nav-btn next" onclick="markDoneAndNext()">
+          <span class="nav-label">Mark done &amp; continue →</span>
+          <span class="nav-title">${lessons[state.currentLesson+1].title}</span>
+        </div>` : `
+        <div class="nav-btn next" onclick="markDone()">
+          <span class="nav-label">Mark done ✓</span>
+          <span class="nav-title">Finish Course</span>
+        </div>`}
+    </div>
+  `;
+  window._currentEx = l.exercises;
+  window._starter = l.starter;
+}
+
+function escapeHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+function executeQuery() {
+  const sql = document.getElementById('editor').value;
+  const out = document.getElementById('results');
+  out.style.display = 'block';
+  const r = runQuery(sql);
+  if (!r.ok) {
+    out.innerHTML = `<div class="results-meta">Error</div><div class="results-error">${escapeHtml(r.error)}</div>`;
+    return;
+  }
+  if (!r.results.length) {
+    out.innerHTML = `<div class="results-meta">Executed · No rows returned</div>`;
+    return;
+  }
+  const html = r.results.map(rs => {
+    const cols = rs.columns.map(c => `<th>${escapeHtml(c)}</th>`).join('');
+    const rows = rs.values.map(row =>
+      `<tr>${row.map(v => `<td>${v === null ? '<em style="color:#999">NULL</em>' : escapeHtml(String(v))}</td>`).join('')}</tr>`
+    ).join('');
+    return `
+      <div class="results-meta">${rs.values.length} row${rs.values.length===1?'':'s'}</div>
+      <table class="results-table"><thead><tr>${cols}</tr></thead><tbody>${rows}</tbody></table>
+    `;
+  }).join('<div style="height:10px"></div>');
+  out.innerHTML = html;
+}
+
+function resetEditor() {
+  document.getElementById('editor').value = window._starter;
+  document.getElementById('results').style.display = 'none';
+}
+function loadIntoEditor(i) {
+  document.getElementById('editor').value = `-- ${window._currentEx[i].prompt}\n\n`;
+  document.getElementById('editor').focus();
+  document.getElementById('editor').scrollIntoView({behavior:'smooth', block:'center'});
+}
+function toggleSolution(i) {
+  document.getElementById(`solution-${i}`).classList.toggle('open');
+}
+function goto(i) {
+  state.currentLesson = i;
+  renderLesson(); renderSidebar(); saveProgress();
+}
+function markDone() {
+  state.completed.add(state.currentLesson);
+  saveProgress(); renderSidebar();
+}
+function markDoneAndNext() {
+  state.completed.add(state.currentLesson);
+  state.currentLesson++;
+  saveProgress(); renderLesson(); renderSidebar();
+}
+
+// Schema panel
+function renderSchema() {
+  const s = document.getElementById('schema-content');
+  const tables = [
+    { name: 'customers', cols: 'id, name, email, city, country, signup_date' },
+    { name: 'products', cols: 'id, name, category, price, stock' },
+    { name: 'orders', cols: 'id, customer_id → customers.id, order_date, status, total' },
+    { name: 'order_items', cols: 'id, order_id → orders.id, product_id → products.id, quantity, unit_price' },
+    { name: 'employees', cols: 'id, name, department, salary, manager_id → employees.id, hire_date' },
+  ];
+  s.innerHTML = tables.map(t => `
+    <div class="schema-table">
+      <div class="schema-table-name">${t.name}</div>
+      <div class="schema-cols">${t.cols.split(',').map(c => `<span>·</span> ${c.trim()}`).join('<br>')}</div>
+    </div>
+  `).join('');
+}
+
+// Boot
+(async () => {
+  loadProgress();
+  await initSQL();
+  renderSidebar();
+  renderLesson();
+  renderSchema();
+  document.getElementById('loading').classList.add('hide');
+})();
+</script>
+</body>
+</html>
